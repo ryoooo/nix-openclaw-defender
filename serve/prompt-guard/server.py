@@ -31,8 +31,8 @@ MODEL_SIZE = os.getenv("MODEL_SIZE", "86m").lower()
 DEVICE_ENV = os.getenv("DEVICE", "auto").lower()
 
 MODEL_MAP = {
-    "86m": "meta-llama/Prompt-Guard-2-86M",
-    "22m": "meta-llama/Prompt-Guard-2-22M",
+    "86m": "meta-llama/Llama-Prompt-Guard-2-86M",
+    "22m": "meta-llama/Llama-Prompt-Guard-2-22M",
 }
 
 LABEL_MAP = {0: "benign", 1: "injection", 2: "jailbreak"}
@@ -70,8 +70,9 @@ def load_model():
     logger.info("Loading model %s on device %s ...", model_name, device)
     t0 = time.perf_counter()
 
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForSequenceClassification.from_pretrained(model_name)
+    hf_token = os.getenv("HF_TOKEN")
+    tokenizer = AutoTokenizer.from_pretrained(model_name, token=hf_token)
+    model = AutoModelForSequenceClassification.from_pretrained(model_name, token=hf_token)
     model.to(device)  # type: ignore[union-attr]
     model.eval()
 
