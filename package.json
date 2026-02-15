@@ -21,9 +21,29 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "prepublishOnly": "npm run build",
     "test": "vitest run",
     "test:watch": "vitest"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nyosegawa/openclaw-defender.git"
+  },
+  "homepage": "https://github.com/nyosegawa/openclaw-defender#readme",
+  "bugs": {
+    "url": "https://github.com/nyosegawa/openclaw-defender/issues"
+  },
+  "keywords": [
+    "prompt-injection",
+    "llm-security",
+    "jailbreak",
+    "discord",
+    "chatbot",
+    "defence",
+    "cerebras",
+    "multilingual"
+  ],
+  "author": "nyosegawa",
   "peerDependencies": {
     "discord.js": ">=14.0.0"
   },

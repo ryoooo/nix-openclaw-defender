@@ -1,5 +1,7 @@
 # openclaw-defender
 
+**[日本語](./README.ja.md)** | **[中文](./README.zh.md)** | **[한국어](./README.ko.md)** | **[Español](./README.es.md)** | **[Français](./README.fr.md)** | **[Deutsch](./README.de.md)** | **[Русский](./README.ru.md)** | **[Português](./README.pt.md)** | **[العربية](./README.ar.md)**
+
 3-layer prompt injection defence for chat bots. Protect LLM-powered applications from prompt injection, jailbreaks, and indirect attacks with zero runtime dependencies.
 
 [![npm version](https://img.shields.io/npm/v/openclaw-defender)](https://www.npmjs.com/package/openclaw-defender)
@@ -41,7 +43,7 @@ openclaw-defender scans user input through a 3-layer pipeline before it reaches 
 
 - **Layer 1** fires instantly with zero network calls. Use `scanSync()` on hot paths.
 - **Layer 2** adds an ML classifier for higher accuracy. Requires a local model server (Docker images provided) or a remote API.
-- **Layer 3** uses a fast LLM (Cerebras Llama 4 Scout by default) as the final arbiter for ambiguous cases, plus intent--action alignment for tool calls.
+- **Layer 3** uses a fast LLM (Cerebras Llama 3.3 70B by default) as the final arbiter for ambiguous cases, plus intent--action alignment for tool calls.
 
 ---
 
@@ -49,6 +51,12 @@ openclaw-defender scans user input through a 3-layer pipeline before it reaches 
 
 ```bash
 npm install openclaw-defender
+```
+
+Layer 3 (LLM judgment) requires a Cerebras API key. Get one for free at [cerebras.ai](https://cloud.cerebras.ai/) and set it as `CEREBRAS_API_KEY`:
+
+```bash
+export CEREBRAS_API_KEY="your-key-here"
 ```
 
 ```ts
@@ -126,7 +134,7 @@ const health = await adapter.healthCheck();
 
 For ambiguous inputs where Layer 1 and 2 disagree, a fast LLM provides the final verdict. Also supports intent--action alignment to verify that tool calls match user intent.
 
-- **Default backend:** Cerebras (Llama 4 Scout 17B, ~200 ms inference)
+- **Default backend:** Cerebras (Llama 3.3 70B, ~300 ms inference)
 - **Also supported:** OpenAI-compatible APIs, Anthropic
 - **Trigger logic:** Only called when confidence is between `triggerThreshold` (0.5) and `confirmThreshold` (0.7)
 
@@ -183,7 +191,7 @@ const scanner = createScanner({
     enabled: true,
     adapter: "cerebras", // "cerebras" | "openai" | "anthropic" | "custom"
     apiKey: process.env.CEREBRAS_API_KEY,
-    model: "llama-4-scout-17b-16e-instruct",
+    model: "llama-3.3-70b",
     baseUrl: "https://api.cerebras.ai/v1",
     triggerThreshold: 0.5,  // min confidence to trigger LLM
     confirmThreshold: 0.7,  // LLM confidence to confirm injection
@@ -299,6 +307,7 @@ docker run -p 8001:8001 deberta-server
 
 | Variable | Default | Description |
 |---|---|---|
+| `CEREBRAS_API_KEY` | — | **Required for Layer 3.** Get a free key at [cerebras.ai](https://cloud.cerebras.ai/) |
 | `MODEL_SIZE` | `86m` | Prompt Guard variant: `86m` or `22m` |
 | `DEVICE` | `auto` | Compute device: `auto`, `cpu`, `cuda` |
 | `HOST` | `0.0.0.0` | Listen address |
@@ -434,7 +443,7 @@ const scanner = createScanner({
 
 | Export | Type | Description |
 |---|---|---|
-| `createCerebrasAdapter(config)` | function | Cerebras (Llama 4 Scout) adapter |
+| `createCerebrasAdapter(config)` | function | Cerebras (Llama 3.3 70B) adapter |
 | `createOpenAICompatibleAdapter(config)` | function | OpenAI-compatible API adapter |
 | `createAnthropicAdapter(config)` | function | Anthropic Claude adapter |
 
