@@ -20,7 +20,7 @@ openclaw-defender はユーザー入力を3層のパイプラインでスキャ�
 |---|---|---|
 | **Layer 1** — ルールエンジン | 20個の正規表現/キーワードルール（多言語対応） | < 1 ms、同期処理 |
 | **Layer 2** — ML分類器 | Prompt Guard 2 / DeBERTa / 外部API | ~20 ms、非同期処理 |
-| **Layer 3** — LLM判定 | Cerebras Llama 3.3 70B によるファイナル判定 + インテント整合性チェック | ~200 ms、非同期処理 |
+| **Layer 3** — LLM判定 | Cerebras GPT-OSS 120B によるファイナル判定 + インテント整合性チェック | ~200 ms、非同期処理 |
 
 各レイヤーは独立して利用できます。Layer 1 だけでもゼロネットワークで即座に防御が可能です。
 
@@ -75,7 +75,7 @@ console.log(asyncResult.blocked); // true
 
 ### Layer 3: LLM判定 + インテント整合性
 
-Layer 1 と Layer 2 の結果が曖昧な場合に、高速な LLM（デフォルト: Cerebras の Llama 3.3 70B）が最終判定を行います。ツールコールがユーザーの意図と一致するかのインテント整合性チェックも可能です。
+Layer 1 と Layer 2 の結果が曖昧な場合に、高速な LLM（デフォルト: Cerebras の GPT-OSS 120B）が最終判定を行います。ツールコールがユーザーの意図と一致するかのインテント整合性チェックも可能です。
 
 `CEREBRAS_API_KEY` 環境変数が必要です。[cerebras.ai](https://cloud.cerebras.ai/) で無料キーを取得してください。
 
@@ -127,7 +127,7 @@ const scanner = createScanner({
     enabled: true,
     adapter: "cerebras",
     apiKey: process.env.CEREBRAS_API_KEY,
-    model: "llama-3.3-70b",
+    model: "gpt-oss-120b",
     baseUrl: "https://api.cerebras.ai/v1",
     triggerThreshold: 0.5,
     confirmThreshold: 0.7,

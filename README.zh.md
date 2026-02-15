@@ -20,7 +20,7 @@ openclaw-defender 通过三层流水线扫描用户输入，在其到达 LLM 之
 |---|---|---|
 | **Layer 1** — 规则引擎 | 20 条正则/关键词规则（多语言支持） | < 1 ms，同步 |
 | **Layer 2** — ML 分类器 | Prompt Guard 2 / DeBERTa / 外部 API | ~20 ms，异步 |
-| **Layer 3** — LLM 判断 | Cerebras Llama 3.3 70B 最终裁决 + 意图对齐检查 | ~200 ms，异步 |
+| **Layer 3** — LLM 判断 | Cerebras GPT-OSS 120B 最终裁决 + 意图对齐检查 | ~200 ms，异步 |
 
 每一层都可以独立使用。仅用 Layer 1 即可在零网络调用下实现即时防护。
 
@@ -75,7 +75,7 @@ console.log(asyncResult.blocked); // true
 
 ### Layer 3：LLM 判断 + 意图对齐
 
-当 Layer 1 和 Layer 2 结果模糊时，高速 LLM（默认：Cerebras 的 Llama 3.3 70B）做出最终判定。还支持意图对齐检查，验证工具调用是否符合用户意图。
+当 Layer 1 和 Layer 2 结果模糊时，高速 LLM（默认：Cerebras 的 GPT-OSS 120B）做出最终判定。还支持意图对齐检查，验证工具调用是否符合用户意图。
 
 需要设置 `CEREBRAS_API_KEY` 环境变量。请在 [cerebras.ai](https://cloud.cerebras.ai/) 免费获取密钥。
 
@@ -127,7 +127,7 @@ const scanner = createScanner({
     enabled: true,
     adapter: "cerebras",
     apiKey: process.env.CEREBRAS_API_KEY,
-    model: "llama-3.3-70b",
+    model: "gpt-oss-120b",
     baseUrl: "https://api.cerebras.ai/v1",
     triggerThreshold: 0.5,
     confirmThreshold: 0.7,

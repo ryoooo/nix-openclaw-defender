@@ -23,7 +23,7 @@ export interface LlmConfig {
   enabled: boolean;
   adapter: "cerebras" | "openai" | "anthropic" | "custom";
   apiKey?: string;
-  /** Model identifier. Default: "llama-3.3-70b" */
+  /** Model identifier. Default: "gpt-oss-120b" */
   model: string;
   /** Base URL for the API. Default: "https://api.cerebras.ai/v1" */
   baseUrl: string;
@@ -113,7 +113,7 @@ export function resolveLlmConfig(
     enabled: true,
     adapter: partial.adapter ?? "cerebras",
     apiKey: partial.apiKey,
-    model: partial.model ?? "llama-3.3-70b",
+    model: partial.model ?? "gpt-oss-120b",
     baseUrl: partial.baseUrl ?? "https://api.cerebras.ai/v1",
     triggerThreshold: partial.triggerThreshold ?? 0.5,
     confirmThreshold: partial.confirmThreshold ?? 0.7,

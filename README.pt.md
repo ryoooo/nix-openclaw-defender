@@ -20,7 +20,7 @@ O openclaw-defender analisa a entrada do usuario por meio de um pipeline de 3 ca
 |---|---|---|---|
 | **Camada 1** | 20 regras (regex/palavras-chave) | < 1 ms | Sincrono. Verificacao instantanea sem chamadas de rede |
 | **Camada 2** | Classificador ML (Prompt Guard / DeBERTa) | ~20 ms | Assincrono. Deteccao com maior precisao |
-| **Camada 3** | Arbitro LLM (Cerebras Llama 3.3 70B) | ~200 ms | Assincrono. Veredito final para casos ambiguos |
+| **Camada 3** | Arbitro LLM (Cerebras GPT-OSS 120B) | ~200 ms | Assincrono. Veredito final para casos ambiguos |
 
 ---
 
@@ -58,7 +58,7 @@ console.log(asyncResult.blocked); // true
 
 **Camada 2 — Classificador ML:** Suporte a Prompt Guard 2 (86M/22M), DeBERTa v3 e APIs remotas. Imagens Docker sao fornecidas no diretorio `serve/`.
 
-**Camada 3 — Arbitro LLM:** Usa Cerebras por padrao (modelo `llama-3.3-70b`, ~300 ms). Tambem suporta APIs compativeis com OpenAI e Anthropic. Acionado apenas quando a confianca esta entre 0.5 e 0.7. Inclui verificacao de alinhamento de intencao (intent alignment) para chamadas de ferramentas.
+**Camada 3 — Arbitro LLM:** Usa Cerebras por padrao (modelo `gpt-oss-120b`, ~300 ms). Tambem suporta APIs compativeis com OpenAI e Anthropic. Acionado apenas quando a confianca esta entre 0.5 e 0.7. Inclui verificacao de alinhamento de intencao (intent alignment) para chamadas de ferramentas.
 
 ---
 
@@ -106,7 +106,7 @@ const scanner = createScanner({
     enabled: true,
     adapter: "cerebras",
     apiKey: process.env.CEREBRAS_API_KEY,
-    model: "llama-3.3-70b",
+    model: "gpt-oss-120b",
     triggerThreshold: 0.5,
     confirmThreshold: 0.7,
   },

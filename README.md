@@ -43,7 +43,7 @@ openclaw-defender scans user input through a 3-layer pipeline before it reaches 
 
 - **Layer 1** fires instantly with zero network calls. Use `scanSync()` on hot paths.
 - **Layer 2** adds an ML classifier for higher accuracy. Requires a local model server (Docker images provided) or a remote API.
-- **Layer 3** uses a fast LLM (Cerebras Llama 3.3 70B by default) as the final arbiter for ambiguous cases, plus intent--action alignment for tool calls.
+- **Layer 3** uses a fast LLM (Cerebras GPT-OSS 120B by default) as the final arbiter for ambiguous cases, plus intent--action alignment for tool calls.
 
 ---
 
@@ -134,7 +134,7 @@ const health = await adapter.healthCheck();
 
 For ambiguous inputs where Layer 1 and 2 disagree, a fast LLM provides the final verdict. Also supports intent--action alignment to verify that tool calls match user intent.
 
-- **Default backend:** Cerebras (Llama 3.3 70B, ~300 ms inference)
+- **Default backend:** Cerebras (GPT-OSS 120B, ~300 ms inference)
 - **Also supported:** OpenAI-compatible APIs, Anthropic
 - **Trigger logic:** Only called when confidence is between `triggerThreshold` (0.5) and `confirmThreshold` (0.7)
 
@@ -191,7 +191,7 @@ const scanner = createScanner({
     enabled: true,
     adapter: "cerebras", // "cerebras" | "openai" | "anthropic" | "custom"
     apiKey: process.env.CEREBRAS_API_KEY,
-    model: "llama-3.3-70b",
+    model: "gpt-oss-120b",
     baseUrl: "https://api.cerebras.ai/v1",
     triggerThreshold: 0.5,  // min confidence to trigger LLM
     confirmThreshold: 0.7,  // LLM confidence to confirm injection
@@ -443,7 +443,7 @@ const scanner = createScanner({
 
 | Export | Type | Description |
 |---|---|---|
-| `createCerebrasAdapter(config)` | function | Cerebras (Llama 3.3 70B) adapter |
+| `createCerebrasAdapter(config)` | function | Cerebras (GPT-OSS 120B) adapter |
 | `createOpenAICompatibleAdapter(config)` | function | OpenAI-compatible API adapter |
 | `createAnthropicAdapter(config)` | function | Anthropic Claude adapter |
 

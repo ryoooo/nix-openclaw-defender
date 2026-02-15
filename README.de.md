@@ -20,7 +20,7 @@ openclaw-defender prueft Benutzereingaben durch eine 3-Schichten-Pipeline, bevor
 |---|---|---|
 | **Schicht 1** | 20 Regex-/Schluesselwort-Regeln (synchron) | < 1 ms |
 | **Schicht 2** | ML-Klassifikator (Prompt Guard / DeBERTa) | ~20 ms |
-| **Schicht 3** | LLM-Urteil (Cerebras `llama-3.3-70b`) | ~200 ms |
+| **Schicht 3** | LLM-Urteil (Cerebras `gpt-oss-120b`) | ~200 ms |
 
 - **Schicht 1** wird sofort ausgefuehrt, ohne Netzwerkaufrufe. Verwende `scanSync()` auf kritischen Pfaden.
 - **Schicht 2** ergaenzt einen ML-Klassifikator fuer hoehere Genauigkeit. Erfordert einen lokalen Modellserver (Docker-Images enthalten) oder eine Remote-API.
@@ -81,7 +81,7 @@ const scanner = createScanner({
     enabled: true,
     adapter: "cerebras",
     apiKey: process.env.CEREBRAS_API_KEY,
-    model: "llama-3.3-70b",
+    model: "gpt-oss-120b",
     baseUrl: "https://api.cerebras.ai/v1",
     triggerThreshold: 0.5,
     confirmThreshold: 0.7,
