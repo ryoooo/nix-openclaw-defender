@@ -2,25 +2,51 @@ import type { DefenceConfig } from "../config.js";
 
 // ── OpenClaw Plugin API types (import type only) ─────────────
 // Declared locally to avoid runtime dependency on openclaw.
+// Matches openclaw/plugin-sdk interface as of 2026.2.15.
 
-export interface OpenClawPluginApi {
-  on(hook: string, handler: (...args: any[]) => any, options?: { priority?: number }): void;
-  registerService(name: string, service: OpenClawService): void;
-  registerCommand(name: string, handler: (args: string[]) => void | Promise<void>): void;
-  getConfig(): Record<string, unknown>;
-  log(level: "debug" | "info" | "warn" | "error", message: string): void;
+export interface OpenClawLogger {
+  debug?: (message: string) => void;
+  info: (message: string) => void;
+  warn: (message: string) => void;
+  error: (message: string) => void;
 }
 
 export interface OpenClawService {
-  start(): void | Promise<void>;
-  stop(): void | Promise<void>;
+  id: string;
+  start(ctx?: any): void | Promise<void>;
+  stop?(ctx?: any): void | Promise<void>;
+}
+
+export interface OpenClawCommandDefinition {
+  name: string;
+  description: string;
+  acceptsArgs?: boolean;
+  handler(ctx: { args?: string; commandBody: string; [key: string]: unknown }): any;
+}
+
+export interface OpenClawPluginApi {
+  on(
+    hook: string,
+    handler: (...args: any[]) => any,
+    options?: { priority?: number },
+  ): void;
+  registerService(service: OpenClawService): void;
+  registerCommand(command: OpenClawCommandDefinition): void;
+  logger: OpenClawLogger;
+  config: Record<string, unknown>;
+  pluginConfig?: Record<string, unknown>;
 }
 
 export interface OpenClawPluginDefinition {
   id: string;
   name: string;
-  version: string;
+  version?: string;
   description: string;
+  configSchema?: {
+    safeParse?: (value: unknown) => { success: boolean; data?: unknown; error?: unknown };
+    parse?: (value: unknown) => unknown;
+    jsonSchema?: Record<string, unknown>;
+  };
   register(api: OpenClawPluginApi): void | Promise<void>;
 }
 
@@ -40,6 +66,10 @@ export interface DefenderPluginConfig {
     intentAlignment: boolean;
     /** Tool names considered dangerous. */
     dangerousTools: string[];
+    /** Block write/edit/overwrite operations targeting these files. Default: SOUL.md, HEARTBEAT.md, etc. */
+    protectedFiles: string[];
+    /** Tool names considered file-write operations. */
+    writeTools: string[];
   };
   outputGuard: {
     enabled: boolean;
@@ -74,6 +104,20 @@ export function createDefaultPluginConfig(): DefenderPluginConfig {
     beforeToolCall: {
       enabled: true,
       intentAlignment: true,
+      protectedFiles: [],
+      writeTools: [
+        "write",
+        "edit",
+        "apply_patch",
+        "write_file",
+        "edit_file",
+        "create_file",
+        "overwrite_file",
+        "save_file",
+        "patch_file",
+        "append_file",
+        "update_file",
+      ],
       dangerousTools: [
         "exec",
         "bash",
@@ -126,6 +170,12 @@ export function mergePluginConfig(
       dangerousTools:
         overrides.beforeToolCall?.dangerousTools ??
         base.beforeToolCall.dangerousTools,
+      protectedFiles:
+        overrides.beforeToolCall?.protectedFiles ??
+        base.beforeToolCall.protectedFiles,
+      writeTools:
+        overrides.beforeToolCall?.writeTools ??
+        base.beforeToolCall.writeTools,
     },
     outputGuard: { ...base.outputGuard, ...overrides.outputGuard },
     fileIntegrity: {

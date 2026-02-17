@@ -3,17 +3,22 @@ import { createKillSwitchService } from "../../src/plugin/services/kill-switch.j
 import { createDefaultPluginConfig } from "../../src/plugin/config.js";
 import type { OpenClawPluginApi } from "../../src/plugin/config.js";
 
-function createMockApi(): OpenClawPluginApi & { commands: Map<string, Function> } {
-  const commands = new Map<string, Function>();
+function createMockApi(): OpenClawPluginApi & { commands: Map<string, any> } {
+  const commands = new Map<string, any>();
   return {
     commands,
     on() {},
     registerService() {},
-    registerCommand(name: string, handler: Function) {
-      commands.set(name, handler);
+    registerCommand(command: any) {
+      commands.set(command.name, command);
     },
-    getConfig: () => ({}),
-    log: vi.fn(),
+    config: {},
+    logger: {
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    },
   };
 }
 
@@ -64,9 +69,9 @@ describe("kill-switch service", () => {
 
     expect(api.commands.has("defender-kill")).toBe(true);
 
-    // Simulate command execution
-    const commandHandler = api.commands.get("defender-kill")!;
-    commandHandler(["emergency", "stop"]);
+    // Simulate command execution via OpenClaw command handler
+    const command = api.commands.get("defender-kill")!;
+    command.handler({ args: "emergency stop", commandBody: "/defender-kill emergency stop" });
 
     expect(ks.isTriggered()).toBe(true);
     expect(ks.getState().reason).toBe("emergency stop");
@@ -80,8 +85,8 @@ describe("kill-switch service", () => {
 
     ks.start();
 
-    const commandHandler = api.commands.get("defender-kill")!;
-    commandHandler([]);
+    const command = api.commands.get("defender-kill")!;
+    command.handler({ args: "", commandBody: "/defender-kill" });
 
     expect(ks.getState().reason).toBe("Manual kill switch activation");
   });
@@ -97,5 +102,13 @@ describe("kill-switch service", () => {
 
     expect(state1.triggered).toBe(false);
     expect(state2.triggered).toBe(true);
+  });
+
+  it("has correct service id", () => {
+    const config = createDefaultPluginConfig();
+    const api = createMockApi();
+    const ks = createKillSwitchService(api, config);
+
+    expect(ks.id).toBe("defender-kill-switch");
   });
 });

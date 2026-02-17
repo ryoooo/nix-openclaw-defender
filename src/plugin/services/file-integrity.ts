@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { watch } from "node:fs";
 import { resolve } from "node:path";
 import { execFile } from "node:child_process";
@@ -73,7 +73,7 @@ export function createFileIntegrityService(
           rolledBack = true;
         }
       } catch {
-        api.log("error", `[defender] FIM: Failed to rollback ${file}`);
+        api.logger.error(`[defender] FIM: Failed to rollback ${file}`);
       }
     }
 
@@ -85,8 +85,7 @@ export function createFileIntegrityService(
       rolledBack,
     };
 
-    api.log(
-      "error",
+    api.logger.error(
       `[defender] FIM: Tampering detected in ${file} ` +
         `(expected: ${expected.slice(0, 12)}..., actual: ${actual.slice(0, 12)}...)` +
         (rolledBack ? " [rolled back]" : ""),
@@ -106,6 +105,8 @@ export function createFileIntegrityService(
   }
 
   return {
+    id: "defender-file-integrity",
+
     getBaselines() {
       return baselines;
     },
@@ -121,9 +122,11 @@ export function createFileIntegrityService(
         const hash = await computeBaseline(filePath);
         if (hash) {
           baselines.set(file, hash);
-          api.log("debug", `[defender] FIM: Baseline for ${file}: ${hash.slice(0, 12)}...`);
+          api.logger.debug?.(
+            `[defender] FIM: Baseline for ${file}: ${hash.slice(0, 12)}...`,
+          );
         } else {
-          api.log("debug", `[defender] FIM: File not found, skipping: ${file}`);
+          api.logger.debug?.(`[defender] FIM: File not found, skipping: ${file}`);
         }
       }
 
@@ -133,7 +136,9 @@ export function createFileIntegrityService(
         try {
           const watcher = watch(filePath, { persistent: false }, () => {
             // Debounce: wait a tick to let writes complete
-            setTimeout(() => { checkFile(file); }, 100);
+            setTimeout(() => {
+              checkFile(file);
+            }, 100);
           });
           watchers.push(watcher);
         } catch {
@@ -142,10 +147,11 @@ export function createFileIntegrityService(
       }
 
       // Periodic polling as fallback
-      pollTimer = setInterval(() => { checkAll(); }, config.fileIntegrity.checkIntervalMs);
+      pollTimer = setInterval(() => {
+        checkAll();
+      }, config.fileIntegrity.checkIntervalMs);
 
-      api.log(
-        "info",
+      api.logger.info(
         `[defender] FIM: Monitoring ${baselines.size} file(s), polling every ${config.fileIntegrity.checkIntervalMs}ms`,
       );
     },
@@ -159,7 +165,7 @@ export function createFileIntegrityService(
         clearInterval(pollTimer);
         pollTimer = undefined;
       }
-      api.log("info", "[defender] FIM: Stopped");
+      api.logger.info("[defender] FIM: Stopped");
     },
   };
 }

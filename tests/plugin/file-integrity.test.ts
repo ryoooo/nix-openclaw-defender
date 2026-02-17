@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { createFileIntegrityService } from "../../src/plugin/services/file-integrity.js";
 import { createDefaultPluginConfig } from "../../src/plugin/config.js";
-import type { OpenClawPluginApi, OpenClawService } from "../../src/plugin/config.js";
+import type { OpenClawPluginApi } from "../../src/plugin/config.js";
 import type { FileIntegrityEvent } from "../../src/plugin/services/file-integrity.js";
 
 function createMockApi(): OpenClawPluginApi {
@@ -12,8 +12,13 @@ function createMockApi(): OpenClawPluginApi {
     on() {},
     registerService() {},
     registerCommand() {},
-    getConfig: () => ({}),
-    log: vi.fn(),
+    config: {},
+    logger: {
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    },
   };
 }
 
@@ -46,7 +51,7 @@ describe("file-integrity service", () => {
     expect(baselines.has("SOUL.md")).toBe(true);
     expect(baselines.has("CLAUDE.md")).toBe(true);
 
-    fim.stop();
+    fim.stop!();
   });
 
   it("detects file tampering", async () => {
@@ -75,7 +80,7 @@ describe("file-integrity service", () => {
     expect(events[0].rolledBack).toBe(false);
     expect(tamperEvents.length).toBe(1);
 
-    fim.stop();
+    fim.stop!();
   });
 
   it("skips missing files gracefully", async () => {
@@ -92,7 +97,7 @@ describe("file-integrity service", () => {
     const events = await fim.checkNow();
     expect(events.length).toBe(0);
 
-    fim.stop();
+    fim.stop!();
   });
 
   it("no events when file is unchanged", async () => {
@@ -109,6 +114,14 @@ describe("file-integrity service", () => {
     const events = await fim.checkNow();
     expect(events.length).toBe(0);
 
-    fim.stop();
+    fim.stop!();
+  });
+
+  it("has correct service id", () => {
+    const config = createDefaultPluginConfig();
+    const api = createMockApi();
+    const fim = createFileIntegrityService(api, config, { workingDir: testDir });
+
+    expect(fim.id).toBe("defender-file-integrity");
   });
 });

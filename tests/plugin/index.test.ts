@@ -5,12 +5,12 @@ import type { OpenClawPluginApi } from "../../src/plugin/config.js";
 function createMockApi(): OpenClawPluginApi & {
   hooks: Map<string, Function>;
   services: Map<string, any>;
-  commands: Map<string, Function>;
+  commands: Map<string, any>;
   logs: Array<{ level: string; message: string }>;
 } {
   const hooks = new Map<string, Function>();
   const services = new Map<string, any>();
-  const commands = new Map<string, Function>();
+  const commands = new Map<string, any>();
   const logs: Array<{ level: string; message: string }> = [];
 
   return {
@@ -21,15 +21,26 @@ function createMockApi(): OpenClawPluginApi & {
     on(hook: string, handler: Function) {
       hooks.set(hook, handler);
     },
-    registerService(name: string, service: any) {
-      services.set(name, service);
+    registerService(service: any) {
+      services.set(service.id, service);
     },
-    registerCommand(name: string, handler: Function) {
-      commands.set(name, handler);
+    registerCommand(command: any) {
+      commands.set(command.name, command);
     },
-    getConfig: () => ({}),
-    log(level: string, message: string) {
-      logs.push({ level, message });
+    config: {},
+    logger: {
+      debug(message: string) {
+        logs.push({ level: "debug", message });
+      },
+      info(message: string) {
+        logs.push({ level: "info", message });
+      },
+      warn(message: string) {
+        logs.push({ level: "warn", message });
+      },
+      error(message: string) {
+        logs.push({ level: "error", message });
+      },
     },
   };
 }
@@ -39,8 +50,9 @@ describe("createDefenderPlugin", () => {
     const plugin = createDefenderPlugin();
     expect(plugin.id).toBe("openclaw-defender");
     expect(plugin.name).toBe("OpenClaw Defender");
-    expect(plugin.version).toBe("0.2.0");
+    expect(plugin.version).toBe("0.3.0");
     expect(typeof plugin.register).toBe("function");
+    expect(plugin.configSchema).toBeDefined();
   });
 
   it("registers all hooks with default config", async () => {

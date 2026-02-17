@@ -1,0 +1,8 @@
+{
+  "id": "openclaw-defender",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}

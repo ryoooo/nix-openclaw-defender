@@ -39,19 +39,18 @@ export function createKillSwitchService(
     state.reason = reason;
     state.timestamp = new Date();
 
-    api.log(
-      "error",
-      `[defender] KILL SWITCH TRIGGERED: ${reason}`,
-    );
+    api.logger.error(`[defender] KILL SWITCH TRIGGERED: ${reason}`);
 
     try {
       opts?.onKill?.(reason);
     } catch {
-      api.log("error", "[defender] Kill switch callback failed");
+      api.logger.error("[defender] Kill switch callback failed");
     }
   }
 
   return {
+    id: "defender-kill-switch",
+
     trigger,
 
     getState() {
@@ -64,19 +63,27 @@ export function createKillSwitchService(
 
     start() {
       // Register the /defender-kill command
-      api.registerCommand("defender-kill", (args: string[]) => {
-        const reason = args.length > 0
-          ? args.join(" ")
-          : "Manual kill switch activation";
-        trigger(reason);
+      api.registerCommand({
+        name: "defender-kill",
+        description: "Emergency kill switch for openclaw-defender",
+        acceptsArgs: true,
+        handler(ctx) {
+          const reason = ctx.args
+            ? ctx.args
+            : "Manual kill switch activation";
+          trigger(reason);
+          return { text: `[defender] Kill switch triggered: ${reason}` };
+        },
       });
 
-      api.log("info", "[defender] Kill switch armed. Use /defender-kill to trigger.");
+      api.logger.info(
+        "[defender] Kill switch armed. Use /defender-kill to trigger.",
+      );
     },
 
     stop() {
       // Nothing to clean up
-      api.log("info", "[defender] Kill switch disarmed");
+      api.logger.info("[defender] Kill switch disarmed");
     },
   };
 }

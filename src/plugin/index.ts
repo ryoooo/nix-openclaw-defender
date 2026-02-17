@@ -38,6 +38,10 @@ export {
 } from "./utils/credential-patterns.js";
 export type { CredentialMatch } from "./utils/credential-patterns.js";
 
+// ── Default export for OpenClaw auto-loading ─────────────────
+
+export default createDefenderPlugin();
+
 // ── Plugin factory ───────────────────────────────────────────
 
 /**
@@ -63,12 +67,19 @@ export function createDefenderPlugin(
   return {
     id: "openclaw-defender",
     name: "OpenClaw Defender",
-    version: "0.2.0",
+    version: "0.3.0",
     description:
       "3-layer prompt injection defence with file integrity monitoring and kill switch",
+    configSchema: {
+      jsonSchema: {
+        type: "object",
+        additionalProperties: false,
+        properties: {},
+      },
+    },
 
     async register(api: OpenClawPluginApi) {
-      api.log("info", "[defender] Initializing openclaw-defender plugin...");
+      api.logger.info("[defender] Initializing openclaw-defender plugin...");
 
       // Create scanner with optional config overrides
       const scanner: Scanner = createScanner(config.scanner);
@@ -82,7 +93,7 @@ export function createDefenderPlugin(
       let killSwitch: ReturnType<typeof createKillSwitchService> | undefined;
       if (config.killSwitch.enabled) {
         killSwitch = createKillSwitchService(api, config);
-        api.registerService("defender-kill-switch", killSwitch);
+        api.registerService(killSwitch);
       }
 
       // ── File integrity monitor ──────────────────────────
@@ -100,19 +111,17 @@ export function createDefenderPlugin(
             }
           },
         });
-        api.registerService("defender-file-integrity", fim);
+        api.registerService(fim);
       }
 
-      api.log("info", "[defender] Plugin registered successfully");
-      api.log("info", `[defender] Mode: ${config.scanMode}`);
-      api.log(
-        "info",
+      api.logger.info("[defender] Plugin registered successfully");
+      api.logger.info(`[defender] Mode: ${config.scanMode}`);
+      api.logger.info(
         `[defender] Hooks: tool-result-scan=${config.toolResultScan.enabled}, ` +
           `before-tool-call=${config.beforeToolCall.enabled}, ` +
           `output-guard=${config.outputGuard.enabled}`,
       );
-      api.log(
-        "info",
+      api.logger.info(
         `[defender] Services: file-integrity=${config.fileIntegrity.enabled}, ` +
           `kill-switch=${config.killSwitch.enabled}`,
       );

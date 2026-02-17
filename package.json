@@ -65,5 +65,10 @@
     "vitest": "^3.0.0",
     "discord.js": "^14.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "openclaw": {
+    "extensions": [
+      "./dist/plugin/index.js"
+    ]
+  }
 }
