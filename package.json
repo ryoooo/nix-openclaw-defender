@@ -1,6 +1,6 @@
 {
   "name": "openclaw-defender",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "3-layer prompt injection defence for chat bots",
   "type": "module",
   "main": "dist/index.js",
@@ -9,6 +9,10 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./plugin": {
+      "import": "./dist/plugin/index.js",
+      "types": "./dist/plugin/index.d.ts"
     }
   },
   "files": [
@@ -45,10 +49,14 @@
   ],
   "author": "nyosegawa",
   "peerDependencies": {
-    "discord.js": ">=14.0.0"
+    "discord.js": ">=14.0.0",
+    "openclaw": ">=0.1.0"
   },
   "peerDependenciesMeta": {
     "discord.js": {
+      "optional": true
+    },
+    "openclaw": {
       "optional": true
     }
   },
