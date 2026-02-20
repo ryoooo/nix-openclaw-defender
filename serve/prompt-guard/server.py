@@ -35,7 +35,7 @@ MODEL_MAP = {
     "22m": "meta-llama/Llama-Prompt-Guard-2-22M",
 }
 
-LABEL_MAP = {0: "benign", 1: "injection", 2: "jailbreak"}
+LABEL_MAP = {0: "benign", 1: "injection"}
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger("prompt-guard-server")
