@@ -84,6 +84,14 @@
             ProtectHome = true;
             PrivateTmp = true;
             ReadWritePaths = [ cfg.modelCacheDir ];
+            ExecStartPost = pkgs.writeShellScript "wait-prompt-guard" ''
+              for i in $(seq 1 60); do
+                ${pkgs.curl}/bin/curl -sf http://127.0.0.1:${toString cfg.port}/health && exit 0
+                sleep 2
+              done
+              echo "Prompt Guard server did not become ready within 120s" >&2
+              exit 1
+            '';
           } // lib.optionalAttrs (cfg.hfTokenFile != null) {
             LoadCredential = [ "hf-token:${cfg.hfTokenFile}" ];
           };
@@ -139,6 +147,14 @@
             ProtectHome = true;
             PrivateTmp = true;
             ReadWritePaths = [ cfg.modelCacheDir ];
+            ExecStartPost = pkgs.writeShellScript "wait-deberta" ''
+              for i in $(seq 1 60); do
+                ${pkgs.curl}/bin/curl -sf http://127.0.0.1:${toString cfg.port}/health && exit 0
+                sleep 2
+              done
+              echo "DeBERTa server did not become ready within 120s" >&2
+              exit 1
+            '';
           };
         };
       };
