@@ -72,7 +72,7 @@
           };
           script = ''
             ${lib.optionalString (cfg.hfTokenFile != null) ''
-              export HF_TOKEN="$(cat ${cfg.hfTokenFile})"
+              export HF_TOKEN="$(cat "$CREDENTIALS_DIRECTORY/hf-token")"
             ''}
             exec ${self.packages.${pkgs.stdenv.hostPlatform.system}.prompt-guard-server}/bin/prompt-guard-server
           '';
@@ -84,6 +84,8 @@
             ProtectHome = true;
             PrivateTmp = true;
             ReadWritePaths = [ cfg.modelCacheDir ];
+          } // lib.optionalAttrs (cfg.hfTokenFile != null) {
+            LoadCredential = [ "hf-token:${cfg.hfTokenFile}" ];
           };
         };
       };
