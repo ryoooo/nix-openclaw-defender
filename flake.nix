@@ -74,7 +74,7 @@
             ${lib.optionalString (cfg.hfTokenFile != null) ''
               export HF_TOKEN="$(cat ${cfg.hfTokenFile})"
             ''}
-            exec ${self.packages.${pkgs.system}.prompt-guard-server}/bin/prompt-guard-server
+            exec ${self.packages.${pkgs.stdenv.hostPlatform.system}.prompt-guard-server}/bin/prompt-guard-server
           '';
           serviceConfig = {
             Restart = "on-failure";
@@ -122,7 +122,7 @@
             HF_HOME = cfg.modelCacheDir;
           };
           serviceConfig = {
-            ExecStart = "${self.packages.${pkgs.system}.deberta-server}/bin/deberta-server";
+            ExecStart = "${self.packages.${pkgs.stdenv.hostPlatform.system}.deberta-server}/bin/deberta-server";
             Restart = "on-failure";
             RestartSec = 15;
           };
