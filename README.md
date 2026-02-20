@@ -69,6 +69,10 @@ services.openclaw-defender.prompt-guard = {
 };
 ```
 
+## CUDA Support
+
+The default `torch` package from nixpkgs is CPU-only. If you set `device = "cuda"`, you need a nixpkgs overlay that provides a CUDA-enabled `torch` build. Without it, the server will fail to use GPU acceleration.
+
 ## Packages
 
 Available as standalone packages:

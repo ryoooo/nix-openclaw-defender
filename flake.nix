@@ -79,6 +79,11 @@
           serviceConfig = {
             Restart = "on-failure";
             RestartSec = 15;
+            NoNewPrivileges = true;
+            ProtectSystem = "strict";
+            ProtectHome = true;
+            PrivateTmp = true;
+            ReadWritePaths = [ cfg.modelCacheDir ];
           };
         };
       };
@@ -121,10 +126,17 @@
             DEVICE = cfg.device;
             HF_HOME = cfg.modelCacheDir;
           };
+          script = ''
+            exec ${self.packages.${pkgs.stdenv.hostPlatform.system}.deberta-server}/bin/deberta-server
+          '';
           serviceConfig = {
-            ExecStart = "${self.packages.${pkgs.stdenv.hostPlatform.system}.deberta-server}/bin/deberta-server";
             Restart = "on-failure";
             RestartSec = 15;
+            NoNewPrivileges = true;
+            ProtectSystem = "strict";
+            ProtectHome = true;
+            PrivateTmp = true;
+            ReadWritePaths = [ cfg.modelCacheDir ];
           };
         };
       };
