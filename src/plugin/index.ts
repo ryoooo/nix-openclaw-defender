@@ -38,9 +38,54 @@ export {
 } from "./utils/credential-patterns.js";
 export type { CredentialMatch } from "./utils/credential-patterns.js";
 
+// ── Env-driven config for headless / Nix deployments ────────
+
+function readEnvOverrides(): Partial<DefenderPluginConfig> {
+  const overrides: Partial<DefenderPluginConfig> = {};
+
+  // Layer 3: Cerebras LLM judgment (auto-enable if API key present)
+  const cerebrasKey = process.env.CEREBRAS_API_KEY;
+  if (cerebrasKey) {
+    overrides.scanner = {
+      llm: {
+        enabled: true,
+        adapter: "cerebras" as const,
+        apiKey: cerebrasKey,
+        model: process.env.DEFENDER_LLM_MODEL ?? "gpt-oss-120b",
+        baseUrl: process.env.DEFENDER_LLM_BASE_URL ?? "https://api.cerebras.ai/v1",
+        triggerThreshold: 0.5,
+        confirmThreshold: 0.7,
+        timeoutMs: 3000,
+      },
+    };
+  }
+
+  // FIM: override watch files
+  const watchFiles = process.env.DEFENDER_WATCH_FILES;
+  if (watchFiles) {
+    overrides.fileIntegrity = {
+      enabled: true,
+      watchFiles: watchFiles.split(",").map((f) => f.trim()).filter(Boolean),
+      autoRollback: false,
+      checkIntervalMs: 60_000,
+    };
+  }
+
+  // Protected files: override via env
+  const protectedFiles = process.env.DEFENDER_PROTECTED_FILES;
+  if (protectedFiles) {
+    overrides.beforeToolCall = {
+      ...createDefaultPluginConfig().beforeToolCall,
+      protectedFiles: protectedFiles.split(",").map((f) => f.trim()).filter(Boolean),
+    };
+  }
+
+  return overrides;
+}
+
 // ── Default export for OpenClaw auto-loading ─────────────────
 
-export default createDefenderPlugin();
+export default createDefenderPlugin(readEnvOverrides());
 
 // ── Plugin factory ───────────────────────────────────────────
 
