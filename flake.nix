@@ -19,14 +19,18 @@
       deberta-server = pkgs.writeShellScriptBin "deberta-server" ''
         exec ${py}/bin/python ${self}/serve/deberta/server.py
       '';
-      openclaw-defender-plugin = pkgs.buildNpmPackage {
+      openclaw-defender-plugin = let
         pname = "openclaw-defender";
-        version = "0.3.0";
-        src = self;
-        npmDepsHash = "sha256-am+cLkmBT9fZOQsbNHQ99PlbV5R5x1QXg4DuoaRIILM=";
-        nodejs = pkgs.nodejs_22;
-        npmBuildScript = "build";
-      };
+        pkg = pkgs.buildNpmPackage {
+          inherit pname;
+          version = "0.3.0";
+          src = self;
+          npmDepsHash = "sha256-tfcCyd0q2K/ylwImYJ5ZQ/XmSCbu10lKxFkeB9vNnDw=";
+          nodejs = pkgs.nodejs_22;
+          npmBuildScript = "build";
+          passthru.pluginPath = "${pkg}/lib/node_modules/${pname}";
+        };
+      in pkg;
 
       default = self.packages.${system}.prompt-guard-server;
     });
